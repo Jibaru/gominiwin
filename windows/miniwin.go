@@ -6,39 +6,8 @@ import (
 	"syscall"
 	"unsafe"
 
+	"github.com/jibaru/gominiwin/keys"
 	"github.com/jibaru/gominiwin/windows/primitives"
-)
-
-const (
-	ESCAPE = iota
-	LEFT
-	RIGHT
-	UP
-	DOWN
-	F1
-	F2
-	F3
-	F4
-	F5
-	F6
-	F7
-	F8
-	F9
-	F10
-	SPACE
-	RETURN
-	NONE
-)
-
-const (
-	BLACK = iota
-	RED
-	GREEN
-	BLUE
-	YELLOW
-	MAGENTA
-	CYAN
-	WHITE
 )
 
 var colorRefs = []primitives.COLORREF{
@@ -103,7 +72,7 @@ func newMemDC(w, h int32) {
 	primitives.SetBkMode(hDCMem, primitives.PS_SOLID)
 }
 
-func New() (*window, error) {
+func New(title string, width, height int) (*window, error) {
 	if runtime.GOOS != "windows" {
 		return nil, fmt.Errorf("windows is needed to run this api")
 	}
@@ -123,7 +92,7 @@ func New() (*window, error) {
 	wincl.LpszMenuName = 0
 	wincl.CbClsExtra = 0
 	wincl.CbWndExtra = 0
-	background, err := primitives.GetStockObject(primitives.BLACK_BRUSH)
+	background, err := primitives.GetStockObject(5) // 5 is COLOR_WINDOW
 	if err != nil {
 		return nil, err
 	}
@@ -133,13 +102,16 @@ func New() (*window, error) {
 		return nil, err
 	}
 
+	iWidth = int32(width)
+	iHeight = int32(height)
+
 	var w, h int32
 	w, h = realFrame(iWidth, iHeight)
 
 	hWnd, err = primitives.CreateWindowEx(
 		0, // Extended options
 		uintptr(unsafe.Pointer(primitives.StringToUTF16Ptr(szClassName))),
-		uintptr(unsafe.Pointer(primitives.StringToUTF16Ptr("Miniwin"))),
+		uintptr(unsafe.Pointer(primitives.StringToUTF16Ptr(title))),
 		primitives.WS_OVERLAPPEDWINDOW,
 		primitives.CW_USEDEFAULT, // X pos
 		primitives.CW_USEDEFAULT, // Y pos
@@ -281,7 +253,7 @@ func windowProcedure(hWnd primitives.HWND, message primitives.UINT, wParam primi
 
 func KeyPressed() int {
 	if len(keysPressed) == 0 {
-		return NONE
+		return keys.NONE
 	}
 
 	var ret int
@@ -289,39 +261,39 @@ func KeyPressed() int {
 
 	switch key {
 	case primitives.VK_LEFT:
-		ret = LEFT
+		ret = keys.LEFT
 	case primitives.VK_RIGHT:
-		ret = RIGHT
+		ret = keys.RIGHT
 	case primitives.VK_UP:
-		ret = UP
+		ret = keys.UP
 	case primitives.VK_DOWN:
-		ret = DOWN
+		ret = keys.DOWN
 	case primitives.VK_ESCAPE:
-		ret = ESCAPE
+		ret = keys.ESCAPE
 	case primitives.VK_SPACE:
-		ret = SPACE
+		ret = keys.SPACE
 	case primitives.VK_RETURN:
-		ret = RETURN
+		ret = keys.RETURN
 	case primitives.VK_F1:
-		ret = F1
+		ret = keys.F1
 	case primitives.VK_F2:
-		ret = F2
+		ret = keys.F2
 	case primitives.VK_F3:
-		ret = F3
+		ret = keys.F3
 	case primitives.VK_F4:
-		ret = F4
+		ret = keys.F4
 	case primitives.VK_F5:
-		ret = F5
+		ret = keys.F5
 	case primitives.VK_F6:
-		ret = F6
+		ret = keys.F6
 	case primitives.VK_F7:
-		ret = F7
+		ret = keys.F7
 	case primitives.VK_F8:
-		ret = F8
+		ret = keys.F8
 	case primitives.VK_F9:
-		ret = F9
+		ret = keys.F9
 	case primitives.VK_F10:
-		ret = F10
+		ret = keys.F10
 	default:
 		ret = key
 	}
