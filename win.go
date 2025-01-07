@@ -1,7 +1,5 @@
 package gominiwin
 
-import "github.com/jibaru/gominiwin/windows"
-
 type Canva interface {
 	Point(x, y float32)
 	Line(x1, y1, x2, y2 float32)
@@ -34,8 +32,4 @@ type Win interface {
 	Height() int
 	Resize(newWidth, newHeight int)
 	Close()
-}
-
-func NewWin(title string, width, height int) (Win, error) {
-	return windows.New(title, width, height)
 }
