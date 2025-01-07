@@ -1,4 +1,4 @@
-package gominiwin
+package colors
 
 const (
 	BLACK = iota
