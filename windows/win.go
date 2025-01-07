@@ -1,10 +1,7 @@
 package windows
 
-import "github.com/jibaru/gominiwin"
-
 type window struct{}
 
-var _ gominiwin.Win = &window{}
 var windowInstance *window = &window{}
 
 func (w *window) Start() {
