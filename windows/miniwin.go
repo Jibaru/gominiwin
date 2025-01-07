@@ -1,6 +1,7 @@
 package windows
 
 import (
+	"fmt"
 	"runtime"
 	"syscall"
 	"unsafe"
@@ -103,6 +104,10 @@ func newMemDC(w, h int32) {
 }
 
 func Start() error {
+	if runtime.GOOS != "windows" {
+		return fmt.Errorf("windows is needed to run this api")
+	}
+
 	classNamePtr, _ := syscall.UTF16PtrFromString(szClassName)
 	hInstance, err := primitives.GetModuleHandle(nil)
 	if err != nil {
