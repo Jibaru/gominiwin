@@ -103,15 +103,15 @@ func newMemDC(w, h int32) {
 	primitives.SetBkMode(hDCMem, primitives.PS_SOLID)
 }
 
-func Start() error {
+func New() (*window, error) {
 	if runtime.GOOS != "windows" {
-		return fmt.Errorf("windows is needed to run this api")
+		return nil, fmt.Errorf("windows is needed to run this api")
 	}
 
 	classNamePtr, _ := syscall.UTF16PtrFromString(szClassName)
 	hInstance, err := primitives.GetModuleHandle(nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var wincl primitives.WNDCLASSEX
@@ -125,12 +125,12 @@ func Start() error {
 	wincl.CbWndExtra = 0
 	background, err := primitives.GetStockObject(primitives.BLACK_BRUSH)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	wincl.HbrBackground = background
 
 	if _, err := primitives.RegisterClassEx(&wincl); err != nil {
-		return err
+		return nil, err
 	}
 
 	var w, h int32
@@ -151,9 +151,13 @@ func Start() error {
 		0,                        // no additional data
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	return windowInstance, nil
+}
+
+func Start() {
 	hBitmap = 0 // starts bitmap
 	primitives.ShowWindow(hWnd, 1)
 
@@ -163,8 +167,6 @@ func Start() error {
 		primitives.TranslateMessage(&msg)
 		primitives.DispatchMessage(&msg)
 	}
-
-	return nil
 }
 
 func windowProcedure(hWnd primitives.HWND, message primitives.UINT, wParam primitives.WPARAM, lParam primitives.LPARAM) primitives.LRESULT {
