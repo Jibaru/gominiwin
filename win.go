@@ -25,6 +25,7 @@ type Input interface {
 type Win interface {
 	Input
 	Canva
+	Start()
 	Clear()
 	Refresh()
 	Width() int
