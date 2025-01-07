@@ -1,4 +1,4 @@
-package gominiwin
+package keys
 
 const (
 	ESCAPE = iota
