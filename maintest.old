@@ -1,0 +1,101 @@
+package main
+
+import (
+	"fmt"
+	"syscall"
+	"unsafe"
+
+	mylibrary "github.com/jibaru/gominiwin/windows"
+)
+
+// Constantes para colores
+var (
+	RED    = mylibrary.RGB(255, 0, 0)
+	YELLOW = mylibrary.RGB(255, 255, 0)
+	BLUE   = mylibrary.RGB(0, 0, 255)
+	WHITE  = mylibrary.RGB(255, 255, 255)
+)
+var (
+	className = syscall.StringToUTF16Ptr("TestWindowClass")
+)
+
+func main() {
+	hInstance, err := mylibrary.GetModuleHandle(nil)
+	if err != nil {
+		panic(err)
+	}
+
+	// Registrar clase de ventana
+	wc := mylibrary.WNDCLASSEX{
+		CbSize:        uint32(unsafe.Sizeof(mylibrary.WNDCLASSEX{})),
+		LpfnWndProc:   syscall.NewCallback(WndProc),
+		HInstance:     hInstance,
+		LpszClassName: uintptr(unsafe.Pointer(className)),
+		HbrBackground: mylibrary.HBRUSH(mylibrary.COLOR_WINDOW + 1),
+	}
+	if _, err := mylibrary.RegisterClassEx(&wc); err != nil {
+		panic(err)
+	}
+
+	// Crear ventana
+	hwnd, err := mylibrary.CreateWindowEx(
+		0,
+		uintptr(unsafe.Pointer(className)),
+		uintptr(unsafe.Pointer(mylibrary.StringToUTF16Ptr("Test Window"))),
+		mylibrary.WS_OVERLAPPEDWINDOW,
+		mylibrary.CW_USEDEFAULT,
+		mylibrary.CW_USEDEFAULT,
+		800,
+		600,
+		0,
+		0,
+		hInstance,
+		0,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	mylibrary.ShowWindow(hwnd, mylibrary.SW_SHOW)
+	mylibrary.UpdateWindow(hwnd)
+
+	// Bucle de mensajes
+	var msg mylibrary.MSG
+	for mylibrary.GetMessage(&msg, 0, 0, 0) {
+		mylibrary.TranslateMessage(&msg)
+		mylibrary.DispatchMessage(&msg)
+	}
+}
+
+func WndProc(hwnd mylibrary.HWND, msg uint32, wparam, lparam uintptr) uintptr {
+	switch msg {
+	case mylibrary.WM_PAINT:
+		println("WM_PAINT triggered")
+		hdc, ps, err := mylibrary.BeginPaint(hwnd)
+		if hdc == 0 {
+			fmt.Println(err)
+			break
+		}
+		defer mylibrary.EndPaint(hwnd, ps)
+
+		println("BeginPaint called successfully")
+
+		// Prueba dibujar un rectángulo rojo
+		brush := mylibrary.CreateSolidBrush(RED)
+		if brush == 0 {
+			println("Error: Brush creation failed")
+			break
+		}
+		defer mylibrary.DeleteObject(mylibrary.HGDIOBJ(brush))
+
+		rect := mylibrary.RECT{Left: 0, Top: 0, Right: 800, Bottom: 600}
+		println("Filling rect with RED")
+		mylibrary.FillRect(hdc, &rect, brush)
+		println("Rect filled")
+
+	case mylibrary.WM_DESTROY:
+		mylibrary.PostQuitMessage(0)
+		return 0
+	}
+	return mylibrary.DefWindowProc(hwnd, msg, wparam, lparam)
+}

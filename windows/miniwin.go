@@ -51,7 +51,7 @@ var colorRefs = []primitives.COLORREF{
 	primitives.RGB(255, 255, 255), // WHITE
 }
 
-const szClassName = "MiniWin"
+const szClassName = "GoMiniWin"
 
 var (
 	// hWnd is the main window

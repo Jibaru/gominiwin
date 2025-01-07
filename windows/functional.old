@@ -1,0 +1,421 @@
+package windows
+
+import (
+	"fmt"
+	"sync"
+	"syscall"
+	"unsafe"
+
+	"github.com/jibaru/gominiwin/windows/primitives"
+)
+
+const (
+	ESCAPE rune = iota
+	IZQUIERDA
+	DERECHA
+	ARRIBA
+	ABAJO
+	F1
+	F2
+	F3
+	F4
+	F5
+	F6
+	F7
+	F8
+	F9
+	F10
+	ESPACIO
+	RETURN
+	NINGUNA
+)
+
+var (
+	className = primitives.StringToUTF16Ptr("MyWindowClass")
+)
+
+type Window struct {
+	width  int32
+	height int32
+	title  string
+
+	hwnd primitives.HWND
+
+	onPaint       func(ctx Context, p Painter)
+	onKeyDown     func(ctx Context, k Key)
+	onMouseAction func(ctx Context, s MouseState)
+	loop          func()
+
+	mut *sync.Mutex
+}
+
+type MouseState struct {
+	Position     Pos
+	LeftClicked  bool
+	RightClicked bool
+}
+
+var colorRefs = []primitives.COLORREF{
+	primitives.RGB(0, 0, 0),       // NEGRO
+	primitives.RGB(255, 0, 0),     // ROJO
+	primitives.RGB(0, 255, 0),     // VERDE
+	primitives.RGB(0, 0, 255),     // AZUL
+	primitives.RGB(255, 255, 0),   // AMARILLO
+	primitives.RGB(255, 0, 255),   // MAGENTA
+	primitives.RGB(0, 255, 255),   // CYAN
+	primitives.RGB(255, 255, 255), // BLANCO
+}
+
+const (
+	NEGRO    Color = 0
+	ROJO     Color = 1
+	VERDE    Color = 2
+	AZUL     Color = 3
+	AMARILLO Color = 4
+	MAGENTA  Color = 5
+	CYAN     Color = 6
+	BLANCO   Color = 7
+)
+
+type Color int
+
+func colorToPrimitive(c Color) primitives.COLORREF {
+	i := int(c)
+	if i >= 0 && i < len(colorRefs) {
+		return colorRefs[i]
+	}
+	return colorRefs[0]
+}
+
+type Key struct {
+	wparam primitives.WPARAM
+	value  rune
+}
+
+func (k Key) Is(v rune) bool {
+	return k.value == v
+}
+
+func (k Key) Value() rune {
+	return k.value
+}
+
+type Context struct {
+	painting bool
+}
+
+type Painter struct {
+	width  int32
+	height int32
+	hdc    primitives.HDC
+}
+
+func NewPainter(
+	width int32,
+	height int32,
+	hdc primitives.HDC,
+) *Painter {
+	return &Painter{
+		width:  width,
+		height: height,
+		hdc:    hdc,
+	}
+}
+
+func ClampBounds(top, left, bottom, right, width, height int) (int, int, int, int) {
+	// Asegurarse de que top y bottom están dentro de [0, height]
+	if top < 0 {
+		top = 0
+	}
+	if bottom > height {
+		bottom = height
+	}
+
+	// Asegurarse de que left y right están dentro de [0, width]
+	if left < 0 {
+		left = 0
+	}
+	if right > width {
+		right = width
+	}
+
+	return top, left, bottom, right
+}
+
+func (p *Painter) Rectangle(top, left, right, bottom int, color Color) {
+	top, left, bottom, right = ClampBounds(top, left, bottom, right, int(p.width), int(p.height))
+	brush := primitives.CreateSolidBrush(colorToPrimitive(color))
+	primitives.SelectObject(p.hdc, brush)
+	rect := primitives.RECT{Left: int32(left), Top: int32(top), Right: int32(right), Bottom: int32(bottom)}
+	primitives.FillRect(p.hdc, &rect, brush)
+	primitives.DeleteObject(primitives.HGDIOBJ(brush))
+}
+
+func (p *Painter) Line(x1, y1, x2, y2 int, color Color) {
+	_color := colorToPrimitive(color)
+	primitives.SetDCPenColor(p.hdc, _color)
+	pen, _ := primitives.CreatePen(primitives.PS_SOLID, 1, _color)
+	defer primitives.DeleteObject(primitives.HGDIOBJ(pen))
+	primitives.SelectObject(p.hdc, pen)
+	primitives.MoveToEx(p.hdc, int32(x1), int32(y1), nil)
+	primitives.LineTo(p.hdc, int32(x2), int32(y2))
+}
+
+func (p *Painter) Point(x, y int, color Color) {
+	primitives.SetPixel(p.hdc, int32(x), int32(y), colorToPrimitive(color))
+}
+
+func (p *Painter) CircleFilled(x, y, radius int, fillColor Color) {
+	brush := primitives.CreateSolidBrush(colorToPrimitive(fillColor))
+	defer primitives.DeleteObject(primitives.HGDIOBJ(brush))
+	primitives.SelectObject(p.hdc, brush)
+	primitives.Ellipse(p.hdc, int32(x-radius), int32(y-radius), int32(x+radius), int32(y+radius))
+}
+
+func (p *Painter) CircleNoFilled(x, y, radius int, borderColor Color) {
+	pen, _ := primitives.CreatePen(primitives.PS_SOLID, 1, colorToPrimitive(borderColor))
+	defer primitives.DeleteObject(primitives.HGDIOBJ(pen))
+	primitives.SelectObject(p.hdc, pen)
+	primitives.Ellipse(p.hdc, int32(x-radius), int32(y-radius), int32(x+radius), int32(y+radius))
+}
+
+func (p *Painter) Text(x, y int, value string, color Color) {
+	primitives.SetTextColor(p.hdc, colorToPrimitive(color))
+	primitives.TextOut(p.hdc, int32(x), int32(y), value)
+}
+
+func (p *Painter) RectangleFilled(left, top, right, bottom int, fillColor Color) {
+	brush := primitives.CreateSolidBrush(colorToPrimitive(fillColor))
+	defer primitives.DeleteObject(primitives.HGDIOBJ(brush))
+	rect := primitives.RECT{Left: int32(left), Top: int32(top), Right: int32(right), Bottom: int32(bottom)}
+	primitives.FillRect(p.hdc, &rect, brush)
+}
+
+// RectangleNoFilled dibuja un rectángulo sin relleno con las coordenadas especificadas.
+func (p *Painter) RectangleNoFilled(left, top, right, bottom int, borderColor Color) {
+	pen, _ := primitives.CreatePen(primitives.PS_SOLID, 1, colorToPrimitive(borderColor))
+	defer primitives.DeleteObject(primitives.HGDIOBJ(pen))
+	primitives.SelectObject(p.hdc, pen)
+	primitives.Rectangle(p.hdc, int32(left), int32(top), int32(right), int32(bottom))
+}
+
+type Pos struct {
+	X, Y int
+}
+
+type WindowConfig struct {
+	Width    int
+	Height   int
+	Position *Pos
+}
+
+func NewWindow(title string, config WindowConfig) (*Window, error) {
+	w := &Window{
+		width:  int32(config.Width),
+		height: int32(config.Height),
+		title:  title,
+		mut:    &sync.Mutex{},
+	}
+
+	hInstance, err := primitives.GetModuleHandle(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	classNamePtr := uintptr(unsafe.Pointer(className))
+
+	// Registrar la clase de la ventana
+	wc := primitives.WNDCLASSEX{
+		CbSize:        uint32(unsafe.Sizeof(primitives.WNDCLASSEX{})),
+		LpfnWndProc:   syscall.NewCallback(w.wndProc),
+		HInstance:     hInstance,
+		LpszClassName: classNamePtr,
+		HbrBackground: primitives.HBRUSH(primitives.COLOR_WINDOW + 1),
+	}
+	primitives.RegisterClassEx(&wc)
+
+	x, y := primitives.CW_USEDEFAULT, primitives.CW_USEDEFAULT
+	if config.Position != nil {
+		x, y = config.Position.X, config.Position.Y
+	}
+
+	// Crear la ventana
+	hwnd, err := primitives.CreateWindowEx(
+		0,
+		classNamePtr,
+		uintptr(unsafe.Pointer(primitives.StringToUTF16Ptr("Ventana de Dibujo"))),
+		primitives.WS_OVERLAPPEDWINDOW,
+		int32(x),
+		int32(y),
+		int32(config.Width),
+		int32(config.Height),
+		0,
+		0,
+		hInstance,
+		primitives.NULL, // null
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	w.hwnd = hwnd
+
+	return w, nil
+}
+
+func (w *Window) Run() {
+	primitives.ShowWindow(w.hwnd, primitives.SW_SHOW)
+	primitives.UpdateWindow(w.hwnd)
+
+	// Bucle de mensajes
+	var msg primitives.MSG
+	for primitives.GetMessage(&msg, 0, 0, 0) {
+		primitives.TranslateMessage(&msg)
+		primitives.DispatchMessage(&msg)
+	}
+}
+
+func (w *Window) wndProc(hwnd primitives.HWND, msg uint32, wparam primitives.WPARAM, lparam primitives.LPARAM) uintptr {
+	fmt.Println(msg)
+	switch msg {
+	case primitives.WM_CREATE:
+		primitives.SetTimer(hwnd, 1, 50, primitives.NULL)
+	case primitives.WM_TIMER:
+		if wparam == 1 {
+			if w.loop != nil {
+				w.loop()
+			}
+			primitives.InvalidateRect(hwnd, nil, true)
+		}
+	case primitives.WM_PAINT:
+		w.paint(hwnd)
+	case primitives.WM_KEYDOWN:
+		if w.onKeyDown != nil {
+			var ret rune
+			switch wparam {
+			case primitives.VK_LEFT:
+				ret = IZQUIERDA
+			case primitives.VK_RIGHT:
+				ret = DERECHA
+			case primitives.VK_UP:
+				ret = ARRIBA
+			case primitives.VK_DOWN:
+				ret = ABAJO
+			case primitives.VK_ESCAPE:
+				ret = ESCAPE
+			case primitives.VK_SPACE:
+				ret = ESPACIO
+			case primitives.VK_RETURN:
+				ret = RETURN
+			case primitives.VK_F1:
+				ret = F1
+			case primitives.VK_F2:
+				ret = F2
+			case primitives.VK_F3:
+				ret = F3
+			case primitives.VK_F4:
+				ret = F4
+			case primitives.VK_F5:
+				ret = F5
+			case primitives.VK_F6:
+				ret = F6
+			case primitives.VK_F7:
+				ret = F7
+			case primitives.VK_F8:
+				ret = F8
+			case primitives.VK_F9:
+				ret = F9
+			case primitives.VK_F10:
+				ret = F10
+			default:
+				ret = rune(wparam)
+			}
+
+			w.onKeyDown(Context{}, Key{wparam: wparam, value: ret})
+		}
+	case primitives.WM_MOUSEMOVE,
+		primitives.WM_MOUSELEAVE,
+		primitives.WM_LBUTTONDOWN,
+		primitives.WM_LBUTTONUP,
+		primitives.WM_RBUTTONDOWN,
+		primitives.WM_RBUTTONUP:
+		if w.onMouseAction != nil {
+			w.onMouseAction(Context{}, MouseState{
+				Position: Pos{
+					X: int(primitives.GET_X_LPARAM(lparam)),
+					Y: int(primitives.GET_Y_LPARAM(lparam)),
+				},
+				LeftClicked:  wparam&primitives.MK_LBUTTON != 0,
+				RightClicked: wparam&primitives.MK_RBUTTON != 0,
+			})
+		}
+	case primitives.WM_DESTROY:
+		primitives.PostQuitMessage(0)
+	default:
+		return primitives.DefWindowProc(hwnd, msg, wparam, lparam)
+	}
+	return 0
+}
+
+func (w *Window) paint(hwnd primitives.HWND) {
+	/*hdc := primitives.GetDC(hwnd) // Obtiene el HDC directamente
+	if hdc == 0 {
+		return
+	}
+	defer primitives.ReleaseDC(hwnd, hdc)
+
+	memDC := primitives.CreateCompatibleDC(hdc)
+	memBitmap := primitives.CreateCompatibleBitmap(hdc, w.width, w.height)
+	primitives.SelectObject(memDC, memBitmap)
+
+	// Dibujar en el contexto de memoria
+	if w.onPaint != nil {
+		w.onPaint(Context{painting: true}, Painter{
+			hdc:    memDC,
+			width:  w.width,
+			height: w.height,
+		})
+	}
+
+	// Transferir el contenido del contexto de memoria a la ventana
+	primitives.BitBlt(hdc, 0, 0, w.width, w.height, memDC, 0, 0, primitives.SRCCOPY)
+
+	// Limpiar recursos
+	primitives.DeleteObject(primitives.HGDIOBJ(memBitmap))
+	primitives.DeleteDC(memDC)*/
+
+	hdc, ps, _ := primitives.BeginPaint(hwnd)
+	defer primitives.EndPaint(hwnd, ps)
+
+	if w.onPaint != nil {
+		w.onPaint(Context{painting: true}, Painter{
+			hdc:    hdc,
+			width:  w.width,
+			height: w.height,
+		})
+	}
+}
+
+func (w *Window) Repaint(ctx Context) {
+	primitives.InvalidateRect(w.hwnd, nil, true)
+}
+
+func (w *Window) SetOnPaint(v func(ctx Context, p Painter)) {
+	w.onPaint = v
+}
+
+func (w *Window) SetOnKeyDown(v func(ctx Context, k Key)) {
+	w.onKeyDown = v
+}
+
+func (w *Window) SetOnMouseAction(v func(ctx Context, s MouseState)) {
+	w.onMouseAction = v
+}
+
+func (w *Window) SetLoop(v func()) {
+	w.loop = v
+}
+
+func (w *Window) Close() {
+	primitives.PostMessage(w.hwnd, primitives.WM_CLOSE, 0, 0)
+}
