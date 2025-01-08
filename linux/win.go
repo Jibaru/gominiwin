@@ -39,6 +39,7 @@ type window struct {
 	mouseLeft      bool
 	mouseRight     bool
 	keysPressed    []int
+	buffer         xproto.Pixmap
 }
 
 func New(title string, width, height int) (*window, error) {
@@ -62,7 +63,14 @@ func New(title string, width, height int) (*window, error) {
 		return nil, fmt.Errorf("failed to create graphics context: %w", err)
 	}
 
+	buffer, err := xproto.NewPixmapId(conn)
+	if err != nil {
+		conn.Close()
+		return nil, fmt.Errorf("failed to create pixmap: %w", err)
+	}
+
 	xproto.CreateGC(conn, gc, xproto.Drawable(screen.Root), xproto.GcForeground, []uint32{screen.BlackPixel})
+	xproto.CreatePixmap(conn, screen.RootDepth, buffer, xproto.Drawable(screen.Root), uint16(width), uint16(height))
 
 	// Create the window
 	xproto.CreateWindow(
@@ -91,9 +99,6 @@ func New(title string, width, height int) (*window, error) {
 		[]byte(title),
 	)
 
-	// Map the window (make it visible)
-	xproto.MapWindow(conn, win)
-
 	return &window{
 		conn:   conn,
 		screen: screen,
@@ -102,10 +107,14 @@ func New(title string, width, height int) (*window, error) {
 		width:  width,
 		height: height,
 		color:  screen.BlackPixel,
+		buffer: buffer,
 	}, nil
 }
 
 func (w *window) Start() {
+	// Map the window (make it visible)
+	xproto.MapWindow(w.conn, w.win)
+
 	for {
 		event, err := w.conn.WaitForEvent()
 		if err != nil {
@@ -142,7 +151,8 @@ func (w *window) Clear() {
 }
 
 func (w *window) Refresh() {
-	// w.Clear()
+	xproto.CopyArea(w.conn, xproto.Drawable(w.buffer), xproto.Drawable(w.win), w.gc, 0, 0, 0, 0, uint16(w.width), uint16(w.height))
+
 }
 
 func (w *window) Width() int {
@@ -156,10 +166,22 @@ func (w *window) Height() int {
 func (w *window) Resize(newWidth, newHeight int) {
 	w.width = newWidth
 	w.height = newHeight
+
+	// Recreate the pixmap buffer with new dimensions
+	xproto.FreePixmap(w.conn, w.buffer)
+	newBuffer, err := xproto.NewPixmapId(w.conn)
+	if err != nil {
+		fmt.Printf("Error creating new pixmap: %v\n", err)
+		return
+	}
+	w.buffer = newBuffer
+	xproto.CreatePixmap(w.conn, w.screen.RootDepth, w.buffer, xproto.Drawable(w.win), uint16(newWidth), uint16(newHeight))
+
 	xproto.ConfigureWindow(w.conn, w.win, xproto.ConfigWindowWidth|xproto.ConfigWindowHeight, []uint32{uint32(newWidth), uint32(newHeight)})
 }
 
 func (w *window) Close() {
+	xproto.FreePixmap(w.conn, w.buffer)
 	w.conn.Close()
 }
 
@@ -202,12 +224,12 @@ func (w *window) applyColor() {
 
 func (w *window) Point(x, y float32) {
 	w.applyColor()
-	xproto.PolyPoint(w.conn, xproto.CoordModeOrigin, xproto.Drawable(w.win), w.gc, []xproto.Point{{X: int16(x), Y: int16(y)}})
+	xproto.PolyPoint(w.conn, xproto.CoordModeOrigin, xproto.Drawable(w.buffer), w.gc, []xproto.Point{{X: int16(x), Y: int16(y)}})
 }
 
 func (w *window) Line(x1, y1, x2, y2 float32) {
 	w.applyColor()
-	xproto.PolyLine(w.conn, xproto.CoordModeOrigin, xproto.Drawable(w.win), w.gc, []xproto.Point{
+	xproto.PolyLine(w.conn, xproto.CoordModeOrigin, xproto.Drawable(w.buffer), w.gc, []xproto.Point{
 		{X: int16(x1), Y: int16(y1)},
 		{X: int16(x2), Y: int16(y2)},
 	})
@@ -215,14 +237,14 @@ func (w *window) Line(x1, y1, x2, y2 float32) {
 
 func (w *window) Rectangle(left, top, right, bottom float32) {
 	w.applyColor()
-	xproto.PolyRectangle(w.conn, xproto.Drawable(w.win), w.gc, []xproto.Rectangle{
+	xproto.PolyRectangle(w.conn, xproto.Drawable(w.buffer), w.gc, []xproto.Rectangle{
 		{X: int16(left), Y: int16(top), Width: uint16(right - left), Height: uint16(bottom - top)},
 	})
 }
 
 func (w *window) FilledRectangle(left, top, right, bottom float32) {
 	w.applyColor()
-	xproto.PolyFillRectangle(w.conn, xproto.Drawable(w.win), w.gc, []xproto.Rectangle{
+	xproto.PolyFillRectangle(w.conn, xproto.Drawable(w.buffer), w.gc, []xproto.Rectangle{
 		{X: int16(left), Y: int16(top), Width: uint16(right - left), Height: uint16(bottom - top)},
 	})
 }
@@ -237,7 +259,7 @@ func (w *window) Circle(centerX, centerY, radius float32) {
 		y2 := centerY + radius*float32(math.Sin((angle+5)*math.Pi/180))
 		segments = append(segments, xproto.Segment{X1: int16(x1), Y1: int16(y1), X2: int16(x2), Y2: int16(y2)})
 	}
-	xproto.PolySegment(w.conn, xproto.Drawable(w.win), w.gc, segments)
+	xproto.PolySegment(w.conn, xproto.Drawable(w.buffer), w.gc, segments)
 }
 
 func (w *window) FilledCircle(centerX, centerY, radius float32) {
