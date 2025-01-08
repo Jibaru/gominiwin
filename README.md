@@ -1,5 +1,5 @@
 <h3 align="center">
-  <img src="logo.png" width="300" alt="Logo"/><br/>
+  <img src="logo.png" width="500" alt="Logo"/><br/>
 </h3>
 
 GoMiniWin es un mini-conjunto de funciones para abrir una ventana, pintar en ella y detectar la presión de algunas teclas. Lo justo para poder implementar juegos sencillos sin necesidad de conocer el API de Windows o Linux.
