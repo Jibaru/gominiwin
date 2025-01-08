@@ -174,6 +174,10 @@ func (w *window) SetColorRGB(r, g, b int) {
 	w.SetColor((r&0xFF)<<16 | (g&0xFF)<<8 | (b & 0xFF))
 }
 
+func (w *window) SetText(x, y float32, content string) {
+	// TODO: to be implemented
+}
+
 func (w *window) applyColor() {
 	xproto.ChangeGC(w.conn, w.gc, xproto.GcForeground, []uint32{w.color})
 }

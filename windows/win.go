@@ -42,6 +42,10 @@ func (w *window) SetColorRGB(r, g, b int) {
 	SetColorRGB(r, g, b)
 }
 
+func (w *window) SetText(x, y float32, content string) {
+	SetText(x, y, content)
+}
+
 func (w *window) KeyPressed() int {
 	return KeyPressed()
 }

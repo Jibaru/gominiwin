@@ -11,6 +11,7 @@ type Canva interface {
 	FilledCircle(centerX, centerY, radius float32)
 	SetColor(c colors.Color)
 	SetColorRGB(r, g, b int)
+	SetText(x, y float32, content string)
 }
 
 type Input interface {
