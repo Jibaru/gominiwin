@@ -1,5 +1,7 @@
 package gominiwin
 
+import "github.com/jibaru/gominiwin/colors"
+
 type Canva interface {
 	Point(x, y float32)
 	Line(x1, y1, x2, y2 float32)
@@ -7,7 +9,7 @@ type Canva interface {
 	FilledRectangle(left, top, right, bottom float32)
 	Circle(centerX, centerY, radius float32)
 	FilledCircle(centerX, centerY, radius float32)
-	SetColor(c int)
+	SetColor(c colors.Color)
 	SetColorRGB(r, g, b int)
 }
 

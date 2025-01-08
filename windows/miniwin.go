@@ -8,7 +8,6 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/keys"
 	"github.com/jibaru/gominiwin/windows/primitives"
 )
@@ -75,7 +74,7 @@ func newMemDC(w, h int32) {
 	primitives.SetBkMode(hDCMem, primitives.PS_SOLID)
 }
 
-func New(title string, width, height int) (gominiwin.Win, error) {
+func New(title string, width, height int) (*window, error) {
 	if runtime.GOOS != "windows" {
 		return nil, fmt.Errorf("windows is needed to run this api")
 	}

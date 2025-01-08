@@ -2,8 +2,14 @@
 
 package windows
 
+import (
+	"github.com/jibaru/gominiwin"
+	"github.com/jibaru/gominiwin/colors"
+)
+
 type window struct{}
 
+var _ gominiwin.Win = &window{}
 var windowInstance *window = &window{}
 
 func (w *window) Start() {
@@ -29,7 +35,7 @@ func (w *window) Circle(centerX, centerY, radius float32) {
 func (w *window) FilledCircle(centerX, centerY, radius float32) {
 	FilledCircle(centerX, centerY, radius)
 }
-func (w *window) SetColor(c int) {
+func (w *window) SetColor(c colors.Color) {
 	SetColor(c)
 }
 func (w *window) SetColorRGB(r, g, b int) {

@@ -10,10 +10,11 @@ import (
 	"github.com/jezek/xgb/xproto"
 
 	"github.com/jibaru/gominiwin"
+	"github.com/jibaru/gominiwin/colors"
 	"github.com/jibaru/gominiwin/keys"
 )
 
-var colors = []uint32{
+var colorsRefs = []uint32{
 	0x000000, // black
 	0xFF0000, // red
 	0x00FF00, // green
@@ -23,6 +24,8 @@ var colors = []uint32{
 	0x00FFFF, // cyan
 	0xFFFFFF, // white
 }
+
+var _ gominiwin.Win = &window{}
 
 type window struct {
 	conn           *xgb.Conn
@@ -38,7 +41,7 @@ type window struct {
 	keysPressed    []int
 }
 
-func New(title string, width, height int) (gominiwin.Win, error) {
+func New(title string, width, height int) (*window, error) {
 	conn, err := xgb.NewConn()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to X server: %w", err)
@@ -160,9 +163,9 @@ func (w *window) Close() {
 	w.conn.Close()
 }
 
-func (w *window) SetColor(c int) {
-	if c >= 0 && c < len(colors) {
-		w.color = colors[c]
+func (w *window) SetColor(c colors.Color) {
+	if c >= 0 && c < len(colorsRefs) {
+		w.color = colorsRefs[c]
 		xproto.ChangeGC(w.conn, w.gc, xproto.GcForeground, []uint32{w.color})
 	}
 }
