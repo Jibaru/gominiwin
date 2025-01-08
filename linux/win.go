@@ -175,7 +175,25 @@ func (w *window) SetColorRGB(r, g, b int) {
 }
 
 func (w *window) SetText(x, y float32, content string) {
-	// TODO: to be implemented
+	// Convert float coordinates to integers
+	intX := int16(x)
+	intY := int16(y)
+
+	// Calculate the length of the string in bytes
+	length := uint32(len(content))
+
+	// Create an X11 font ID
+	font, _ := xproto.NewFontId(w.conn)
+
+	// Load a font
+	_ = xproto.OpenFontChecked(w.conn, font, uint16(len("fixed")), "fixed").Check()
+
+	// Set font in graphics context
+	xproto.ChangeGC(w.conn, w.gc, xproto.GcFont, []uint32{uint32(font)})
+
+	// Draw text
+	xproto.ImageText8(w.conn, byte(length), xproto.Drawable(w.win), w.gc, intX, intY, content)
+	xproto.CloseFont(w.conn, font)
 }
 
 func (w *window) applyColor() {
