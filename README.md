@@ -6,7 +6,7 @@ GoMiniWin es un mini-conjunto de funciones para abrir una ventana, pintar en ell
 
 ## Inpiración
 
-Esta librería es un pseudo-port de la librería [MiniWin](https://github.com/pauek/MiniWin) realizada por Pauek pero para Go (la original es para c++). Créditos a él y échenle un ojito a su canal, es un grande!
+Esta librería es un pseudo-port de la librería [MiniWin](https://github.com/pauek/MiniWin) realizada por Pauek pero para Go (la original es para c++). Créditos a él y échenle un ojito a su [canal](https://www.youtube.com/@pauek), es un grande!
 
 ## Instalación
 
