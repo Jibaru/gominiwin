@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"github.com/jibaru/gominiwin/colors"
 	"github.com/jibaru/gominiwin/keys"
 	"github.com/jibaru/gominiwin/windows/primitives"
 )
@@ -430,7 +431,7 @@ func SetText(x, y float32, content string) {
 	primitives.TextOut(hDCMem, int32(x), int32(y), content)
 }
 
-func SetColor(c int) {
+func SetColor(c colors.Color) {
 	if c >= 0 && c < len(colorRefs) {
 		selectedColor = colorRefs[c]
 	}
