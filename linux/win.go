@@ -214,7 +214,7 @@ func (w *window) SetText(x, y float32, content string) {
 	xproto.ChangeGC(w.conn, w.gc, xproto.GcFont, []uint32{uint32(font)})
 
 	// Draw text
-	xproto.ImageText8(w.conn, byte(length), xproto.Drawable(w.win), w.gc, intX, intY, content)
+	xproto.ImageText8(w.conn, byte(length), xproto.Drawable(w.buffer), w.gc, intX, intY, content)
 	xproto.CloseFont(w.conn, font)
 }
 
