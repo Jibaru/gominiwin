@@ -1,11 +1,11 @@
 package keys
 
 const (
-	ESCAPE = iota
-	LEFT
-	RIGHT
-	UP
-	DOWN
+	Escape = iota
+	Left
+	Right
+	Up
+	Down
 	F1
 	F2
 	F3
@@ -16,7 +16,7 @@ const (
 	F8
 	F9
 	F10
-	SPACE
-	RETURN
-	NONE
+	Space
+	Return
+	None
 )

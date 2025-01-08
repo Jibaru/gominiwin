@@ -255,7 +255,7 @@ func windowProcedure(hWnd primitives.HWND, message primitives.UINT, wParam primi
 
 func KeyPressed() int {
 	if len(keysPressed) == 0 {
-		return keys.NONE
+		return keys.None
 	}
 
 	var ret int
@@ -263,19 +263,19 @@ func KeyPressed() int {
 
 	switch key {
 	case primitives.VK_LEFT:
-		ret = keys.LEFT
+		ret = keys.Left
 	case primitives.VK_RIGHT:
-		ret = keys.RIGHT
+		ret = keys.Right
 	case primitives.VK_UP:
-		ret = keys.UP
+		ret = keys.Up
 	case primitives.VK_DOWN:
-		ret = keys.DOWN
+		ret = keys.Down
 	case primitives.VK_ESCAPE:
-		ret = keys.ESCAPE
+		ret = keys.Escape
 	case primitives.VK_SPACE:
-		ret = keys.SPACE
+		ret = keys.Space
 	case primitives.VK_RETURN:
-		ret = keys.RETURN
+		ret = keys.Return
 	case primitives.VK_F1:
 		ret = keys.F1
 	case primitives.VK_F2:

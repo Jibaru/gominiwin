@@ -227,7 +227,7 @@ func (w *window) FilledCircle(centerX, centerY, radius float32) {
 
 func (w *window) KeyPressed() int {
 	if len(w.keysPressed) == 0 {
-		return keys.NONE
+		return keys.None
 	}
 
 	var ret int
@@ -235,19 +235,19 @@ func (w *window) KeyPressed() int {
 
 	switch key {
 	case 9: // Escape key
-		ret = keys.ESCAPE
+		ret = keys.Escape
 	case 36: // Return key
-		ret = keys.RETURN
+		ret = keys.Return
 	case 65: // Space key
-		ret = keys.SPACE
+		ret = keys.Space
 	case 111: // Arrow Up
-		ret = keys.UP
+		ret = keys.Up
 	case 116: // Arrow Down
-		ret = keys.DOWN
+		ret = keys.Down
 	case 113: // Arrow Left
-		ret = keys.LEFT
+		ret = keys.Left
 	case 114: // Arrow Right
-		ret = keys.RIGHT
+		ret = keys.Right
 	case 67: // F1
 		ret = keys.F1
 	case 68: // F2

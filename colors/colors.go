@@ -1,12 +1,14 @@
 package colors
 
+type Color = int
+
 const (
-	BLACK = iota
-	RED
-	GREEN
-	BLUE
-	YELLOW
-	MAGENTA
-	CYAN
-	WHITE
+	Black Color = iota
+	Red
+	Green
+	Blue
+	Yellow
+	Magenta
+	Cyan
+	White
 )
