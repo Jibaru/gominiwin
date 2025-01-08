@@ -13,7 +13,7 @@ Esta librería es un pseudo-port de la librería [MiniWin](https://github.com/pa
 Asegúrate de estar en Windows o Linux.
 
 ```go
-go get github.com/Jibaru/gominiwin
+go get github.com/jibaru/gominiwin
 ```
 
 ## Plantilla básica
