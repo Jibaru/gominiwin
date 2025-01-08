@@ -353,16 +353,16 @@ func Point(x, y float32) {
 }
 
 func Line(x1, y1, x2, y2 float32) {
+	hPen, _ := primitives.CreatePen(primitives.PS_SOLID, 1, selectedColor)
+	defer primitives.DeleteObject(hPen)
+
+	orig := primitives.SelectObject(hDCMem, hPen)
 	primitives.BeginPath(hDCMem)
 	primitives.MoveToEx(hDCMem, int32(x1), int32(y1), nil)
 	primitives.LineTo(hDCMem, int32(x2), int32(y2))
 	primitives.EndPath(hDCMem)
-
-	hPen, _ := primitives.CreatePen(primitives.PS_SOLID, 1, selectedColor)
-	defer primitives.DeleteObject(hPen)
-
-	primitives.SelectObject(hDCMem, hPen)
 	primitives.StrokePath(hDCMem)
+	primitives.SelectObject(hDCMem, orig)
 }
 
 func makeRectangle(left, top, right, bottom float32) {

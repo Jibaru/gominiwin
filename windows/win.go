@@ -20,7 +20,7 @@ func (w *window) Point(x, y float32) {
 	Point(x, y)
 }
 func (w *window) Line(x1, y1, x2, y2 float32) {
-	Line(x1, x2, y1, y2)
+	Line(x1, y1, x2, y2)
 }
 func (w *window) Rectangle(left, top, right, bottom float32) {
 	Rectangle(left, top, right, bottom)
