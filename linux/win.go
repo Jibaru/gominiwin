@@ -9,6 +9,7 @@ import (
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 
+	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/keys"
 )
 
@@ -37,7 +38,7 @@ type window struct {
 	keysPressed    []int
 }
 
-func New(title string, width, height int) (*window, error) {
+func New(title string, width, height int) (gominiwin.Win, error) {
 	conn, err := xgb.NewConn()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to X server: %w", err)
