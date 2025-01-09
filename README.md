@@ -293,3 +293,7 @@ Cierra la ventana y libera los recursos utilizados.
 ### Pintar
 
 ![Paint](examples/paint/ss.png)
+
+### Dino
+
+![Dino](examples/dino/ss.png)
