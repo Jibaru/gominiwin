@@ -184,11 +184,11 @@ Devuelve el código de la última tecla presionada.
 
 Obtiene el estado actual del mouse.
 
-| Valores de retorno | Descripción                   |
-| ------------------ | ----------------------------- |
-| `bool`             | Indica si hay un clic activo. |
-| `float32`          | Coordenada X del mouse.       |
-| `float32`          | Coordenada Y del mouse.       |
+| Valores de retorno | Descripción                                    |
+| ------------------ | ---------------------------------------------- |
+| `bool`             | Indica si el cursor esta dentro de la ventana. |
+| `float32`          | Coordenada X del mouse.                        |
+| `float32`          | Coordenada Y del mouse.                        |
 
 #### `IsMouseInside() bool`
 
@@ -279,3 +279,17 @@ Redimensiona la ventana a un nuevo ancho y alto.
 #### `Close()`
 
 Cierra la ventana y libera los recursos utilizados.
+
+## Ejemplos
+
+### Pizarra
+
+![Board](examples/board/ss.png)
+
+### Figuras
+
+![Figures](examples/figures/ss.png)
+
+### Pintar
+
+![Paint](examples/paint/ss.png)
