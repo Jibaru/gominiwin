@@ -297,3 +297,7 @@ Cierra la ventana y libera los recursos utilizados.
 ### Dino
 
 ![Dino](examples/dino/ss.png)
+
+### Notepad
+
+![Notepad](examples/notepad/ss.png)
