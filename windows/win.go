@@ -3,13 +3,11 @@
 package windows
 
 import (
-	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/colors"
 )
 
 type window struct{}
 
-var _ gominiwin.Win = &window{}
 var windowInstance *window = &window{}
 
 func (w *window) Start() {

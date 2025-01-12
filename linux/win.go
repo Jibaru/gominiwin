@@ -9,7 +9,6 @@ import (
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 
-	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/colors"
 	"github.com/jibaru/gominiwin/keys"
 )
@@ -24,8 +23,6 @@ var colorsRefs = []uint32{
 	0x00FFFF, // cyan
 	0xFFFFFF, // white
 }
-
-var _ gominiwin.Win = &window{}
 
 type window struct {
 	conn           *xgb.Conn
