@@ -300,3 +300,7 @@ Cierra la ventana y libera los recursos utilizados.
 ### Notepad
 
 ![Notepad](examples/notepad/ss.png)
+
+### Imagen
+
+![Image](examples/image/ss.png)
