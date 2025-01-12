@@ -20,22 +20,21 @@ go get github.com/jibaru/gominiwin
 
 Para iniciar una nueva ventana, deberás importar el paquete necesario de acuerdo al sistema operativo que estés usando.
 
-Aquí una plantilla para windows (para linux, deberás usar "github.com/jibaru/gominiwin/linux" en lugar de "github.com/jibaru/gominiwin/windows").
+Aquí una plantilla para windows.
 
 ```go
 package main
 
 import (
 	"time"
-
+	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/colors"
 	"github.com/jibaru/gominiwin/keys"
-	"github.com/jibaru/gominiwin/windows"
 )
 
 func main() {
     // New incializa una nueva ventana, en este caso de 800x600
-	w, err := windows.New("Example", 800, 600)
+	w, err := gominiwin.NewWindowsWin("Example", 800, 600) // usa NewLinuxWin en linux
 	if err != nil {
 		panic(err)
 	}
@@ -52,20 +51,20 @@ func main() {
 		}
 	}()
 
-    // Start inicializa la ventana, esta bloquea la gorutina principal
+	// Start inicializa la ventana, esta bloquea la gorutina principal
 	w.Start()
 }
 ```
 
 ## Funcionamiento de la ventana
 
-Al ejecutar `New(...)`, se crea una nueva ventana. Actualmente GoMiniwin solo soporta el uso de una sola ventana, asi que evita crear múltiples ventanas. Esta ventana no se puede redimensionar con el ratón, pero puedes hacer con la función `Resize`.
+Al ejecutar `NewWindowsWin(...)` o `NewLinuxWin(...)`, se crea una nueva ventana. Actualmente GoMiniwin solo soporta el uso de una sola ventana, asi que evita crear múltiples ventanas. Esta ventana no se puede redimensionar con el ratón, pero puedes hacer con la función `Resize`.
 
 Algo importante a tener en cuenta es que las coordenadas de la ventana son las coordenadas de una "matriz de datos", donde el X crece a medida que vas a la derecha, y la Y crece a medida que vas hacia abajo. El punto (0,0) está en la esquina superior izquierda.
 
 ## Funciones
 
-### (windows/linux).New
+### `NewWindowsWin/NewLinuxWin`
 
 Crea una nueva ventana.
 
@@ -75,10 +74,10 @@ Crea una nueva ventana.
 | `width`    | Ancho de la ventana     |
 | `height`   | Alto de la ventana      |
 
-| Valores de retorno | Descripción                                                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| \*windows.window   | Puntero a la ventana. Esta contiene todas las operaciones para pintar o redimensionar. Implementa la interfaz `Win` |
-| error              | En caso de error, mensaje informativo                                                                               |
+| Valores de retorno | Descripción                                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| \Win               | Puntero a la ventana que implementa la interfaz `Win`. Esta contiene todas las operaciones para pintar o redimensionar. |
+| error              | En caso de error, mensaje informativo.                                                                                  |
 
 ## Documentación de la interfaz `Win`
 
