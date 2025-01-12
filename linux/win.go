@@ -10,6 +10,7 @@ import (
 	"github.com/jezek/xgb/xproto"
 
 	"github.com/jibaru/gominiwin/colors"
+	"github.com/jibaru/gominiwin/errors"
 	"github.com/jibaru/gominiwin/keys"
 )
 
@@ -42,7 +43,7 @@ type window struct {
 func New(title string, width, height int) (*window, error) {
 	conn, err := xgb.NewConn()
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to X server: %w", err)
+		return nil, fmt.Errorf("%w: failed to connect to X server: %w", errors.ErrCreateWinFailed, err)
 	}
 
 	screen := xproto.Setup(conn).DefaultScreen(conn)
@@ -50,20 +51,20 @@ func New(title string, width, height int) (*window, error) {
 	win, err := xproto.NewWindowId(conn)
 	if err != nil {
 		conn.Close()
-		return nil, fmt.Errorf("failed to create window ID: %w", err)
+		return nil, fmt.Errorf("%w: failed to create window ID: %w", errors.ErrCreateWinFailed, err)
 	}
 
 	// Create the graphics context
 	gc, err := xproto.NewGcontextId(conn)
 	if err != nil {
 		conn.Close()
-		return nil, fmt.Errorf("failed to create graphics context: %w", err)
+		return nil, fmt.Errorf("%w: failed to create graphics context: %w", errors.ErrCreateWinFailed, err)
 	}
 
 	buffer, err := xproto.NewPixmapId(conn)
 	if err != nil {
 		conn.Close()
-		return nil, fmt.Errorf("failed to create pixmap: %w", err)
+		return nil, fmt.Errorf("%w: failed to create pixmap: %w", errors.ErrCreateWinFailed, err)
 	}
 
 	xproto.CreateGC(conn, gc, xproto.Drawable(screen.Root), xproto.GcForeground, []uint32{screen.BlackPixel})

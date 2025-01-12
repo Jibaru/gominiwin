@@ -9,6 +9,7 @@ import (
 	"unsafe"
 
 	"github.com/jibaru/gominiwin/colors"
+	"github.com/jibaru/gominiwin/errors"
 	"github.com/jibaru/gominiwin/keys"
 	"github.com/jibaru/gominiwin/windows/primitives"
 )
@@ -77,7 +78,7 @@ func newMemDC(w, h int32) {
 
 func New(title string, width, height int) (*window, error) {
 	if runtime.GOOS != "windows" {
-		return nil, fmt.Errorf("windows is needed to run this api")
+		return nil, fmt.Errorf("%w: windows is needed to run this api", errors.ErrCreateWinFailed)
 	}
 
 	classNamePtr, _ := syscall.UTF16PtrFromString(szClassName)
@@ -97,12 +98,12 @@ func New(title string, width, height int) (*window, error) {
 	wincl.CbWndExtra = 0
 	background, err := primitives.GetStockObject(5) // 5 is COLOR_WINDOW
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %v", errors.ErrCreateWinFailed, err)
 	}
 	wincl.HbrBackground = background
 
 	if _, err := primitives.RegisterClassEx(&wincl); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %v", errors.ErrCreateWinFailed, err)
 	}
 
 	iWidth = int32(width)
@@ -126,7 +127,7 @@ func New(title string, width, height int) (*window, error) {
 		0,                        // no additional data
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %v", errors.ErrCreateWinFailed, err)
 	}
 
 	return windowInstance, nil
