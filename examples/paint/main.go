@@ -8,7 +8,6 @@ import (
 	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/colors"
 	"github.com/jibaru/gominiwin/keys"
-	"github.com/jibaru/gominiwin/windows"
 )
 
 type Brush struct {
@@ -21,7 +20,7 @@ func (b Brush) Draw(w gominiwin.Win) {
 }
 
 func main() {
-	w, err := windows.New("Paint", 800, 600)
+	w, err := gominiwin.NewWindowsWin("Paint", 800, 600)
 	if err != nil {
 		panic(err)
 	}

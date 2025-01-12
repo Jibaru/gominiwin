@@ -5,8 +5,8 @@ package main
 import (
 	"time"
 
+	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/colors"
-	"github.com/jibaru/gominiwin/windows"
 )
 
 type Point struct {
@@ -21,7 +21,7 @@ type Icon struct {
 }
 
 func main() {
-	w, err := windows.New("Paint", 1024, 768)
+	w, err := gominiwin.NewWindowsWin("Paint", 1024, 768)
 	if err != nil {
 		panic(err)
 	}

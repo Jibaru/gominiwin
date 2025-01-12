@@ -11,7 +11,6 @@ import (
 	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/colors"
 	"github.com/jibaru/gominiwin/keys"
-	"github.com/jibaru/gominiwin/windows"
 )
 
 func main() {
@@ -24,7 +23,7 @@ func main() {
 	const cursorCode = keys.Space + 1
 	var heightPos float32 = 0
 
-	w, err := windows.New("Notepad", 800, int(height))
+	w, err := gominiwin.NewWindowsWin("Notepad", 800, int(height))
 	if err != nil {
 		panic(err)
 	}

@@ -1,16 +1,16 @@
-//go:build linux
+//go:build windows
 
 package main
 
 import (
 	"time"
 
+	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/colors"
-	"github.com/jibaru/gominiwin/linux"
 )
 
 func main() {
-	w, err := linux.New("Figures", 800, 600)
+	w, err := gominiwin.NewWindowsWin("Figures", 800, 600)
 	if err != nil {
 		panic(err)
 	}

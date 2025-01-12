@@ -13,7 +13,6 @@ import (
 	"github.com/jibaru/gominiwin"
 	"github.com/jibaru/gominiwin/colors"
 	"github.com/jibaru/gominiwin/keys"
-	"github.com/jibaru/gominiwin/windows"
 )
 
 type Sprite struct {
@@ -108,7 +107,7 @@ func main() {
 		panic(err)
 	}
 
-	w, err := windows.New("DinoGame", 800, 500)
+	w, err := gominiwin.NewWindowsWin("DinoGame", 800, 500)
 	if err != nil {
 		panic(err)
 	}
