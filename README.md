@@ -74,7 +74,7 @@ Crea una nueva ventana.
 
 | Valores de retorno | Descripción                                                                                                             |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| \Win               | Puntero a la ventana que implementa la interfaz `Win`. Esta contiene todas las operaciones para pintar o redimensionar. |
+| Win                | Puntero a la ventana que implementa la interfaz `Win`. Esta contiene todas las operaciones para pintar o redimensionar. |
 | error              | En caso de error, mensaje informativo.                                                                                  |
 
 ## Documentación de la interfaz `Win`
