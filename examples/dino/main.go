@@ -1,5 +1,3 @@
-//go:build windows
-
 package main
 
 import (
@@ -107,7 +105,7 @@ func main() {
 		panic(err)
 	}
 
-	w, err := gominiwin.NewWindowsWin("DinoGame", 800, 500)
+	w, err := gominiwin.New("DinoGame", 800, 500)
 	if err != nil {
 		panic(err)
 	}

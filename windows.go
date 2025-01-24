@@ -4,6 +4,6 @@ package gominiwin
 
 import "github.com/jibaru/gominiwin/windows"
 
-func NewWindowsWin(title string, width, height int) (Win, error) {
+func New(title string, width, height int) (Win, error) {
 	return windows.New(title, width, height)
 }

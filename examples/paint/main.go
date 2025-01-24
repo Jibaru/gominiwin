@@ -1,5 +1,3 @@
-//go:build windows
-
 package main
 
 import (
@@ -20,7 +18,7 @@ func (b Brush) Draw(w gominiwin.Win) {
 }
 
 func main() {
-	w, err := gominiwin.NewWindowsWin("Paint", 800, 600)
+	w, err := gominiwin.New("Paint", 800, 600)
 	if err != nil {
 		panic(err)
 	}

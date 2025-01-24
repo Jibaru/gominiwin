@@ -18,9 +18,7 @@ go get github.com/jibaru/gominiwin
 
 ## Plantilla básica
 
-Para iniciar una nueva ventana, deberás importar el paquete necesario de acuerdo al sistema operativo que estés usando.
-
-Aquí una plantilla para windows.
+Para iniciar una nueva ventana, deberás importar el paquete gominiwin y llamar a la función `New`.
 
 ```go
 package main
@@ -34,7 +32,7 @@ import (
 
 func main() {
     // New incializa una nueva ventana, en este caso de 800x600
-	w, err := gominiwin.NewWindowsWin("Example", 800, 600) // usa NewLinuxWin en linux
+	w, err := gominiwin.New("Example", 800, 600)
 	if err != nil {
 		panic(err)
 	}
@@ -58,13 +56,13 @@ func main() {
 
 ## Funcionamiento de la ventana
 
-Al ejecutar `NewWindowsWin(...)` o `NewLinuxWin(...)`, se crea una nueva ventana. Actualmente GoMiniwin solo soporta el uso de una sola ventana, asi que evita crear múltiples ventanas. Esta ventana no se puede redimensionar con el ratón, pero puedes hacer con la función `Resize`.
+Al ejecutar `New(...)`, se crea una nueva ventana. Actualmente GoMiniwin solo soporta el uso de una sola ventana, asi que evita crear múltiples ventanas. Esta ventana no se puede redimensionar con el ratón, pero puedes hacer con la función `Resize`.
 
 Algo importante a tener en cuenta es que las coordenadas de la ventana son las coordenadas de una "matriz de datos", donde el X crece a medida que vas a la derecha, y la Y crece a medida que vas hacia abajo. El punto (0,0) está en la esquina superior izquierda.
 
 ## Funciones
 
-### `NewWindowsWin/NewLinuxWin`
+### `New`
 
 Crea una nueva ventana.
 

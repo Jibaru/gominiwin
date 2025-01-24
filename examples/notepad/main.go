@@ -1,5 +1,3 @@
-//go:build windows
-
 package main
 
 import (
@@ -23,7 +21,7 @@ func main() {
 	const cursorCode = keys.Space + 1
 	var heightPos float32 = 0
 
-	w, err := gominiwin.NewWindowsWin("Notepad", 800, int(height))
+	w, err := gominiwin.New("Notepad", 800, int(height))
 	if err != nil {
 		panic(err)
 	}

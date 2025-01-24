@@ -1,5 +1,3 @@
-//go:build windows
-
 package main
 
 import (
@@ -21,7 +19,7 @@ type Icon struct {
 }
 
 func main() {
-	w, err := gominiwin.NewWindowsWin("Paint", 1024, 768)
+	w, err := gominiwin.New("Paint", 1024, 768)
 	if err != nil {
 		panic(err)
 	}
